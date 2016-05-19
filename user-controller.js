@@ -3,6 +3,9 @@
  */
 
 var getLogin = function (req, res) {
+    if (req.isAuthenticated()) {
+        res.redirect('/');
+    }
     res.render('login');
 };
 

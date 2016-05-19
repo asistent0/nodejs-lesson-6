@@ -53,13 +53,13 @@ app.post('/login', passport.authenticate('local', {
 
 app.get('/logout', userController.logout);
 app.get('/user', mustBeAuthentificated, userController.getUser);
-app.post('/user', mustBeAuthentificated, userController.postUser);
+app.post('/user', userController.postUser);
 app.get('/', mustBeAuthentificated, todoController.index);
-app.post('/', mustBeAuthentificated, todoController.getting);
-app.post('/add', mustBeAuthentificated, todoController.add);
-app.post('/description', mustBeAuthentificated, todoController.description);
-app.post('/completed', mustBeAuthentificated, todoController.completed);
-app.post('/dell', mustBeAuthentificated, todoController.dell);
+app.post('/', todoController.getting);
+app.post('/add', todoController.add);
+app.post('/description', todoController.description);
+app.post('/completed', todoController.completed);
+app.post('/dell', todoController.dell);
 
 function mustBeAuthentificated(req, res, next) {
     if (req.isAuthenticated()) {

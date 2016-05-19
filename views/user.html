@@ -1,0 +1,10 @@
+<!--Created by asistent on 18.05.2016.
+
+--><!DOCTYPE html><html lang="en"><head><meta charset="utf8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ToDo List</title><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"><!--[if lt IE 9]><script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script><script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]--><style>.user {
+    margin: 10px;
+    padding: 10px;
+}</style></head></html><body><div class="container"><div class="page-header"><div class="row"><div class="col-md-9"><h1>Привет</h1></div><div class="col-md-3"><span class="user"><a href="/" class="btn btn-info">На главную</a></span><span class="user"><a href="/logout" class="btn btn-warning">Выход</a></span></div></div></div><div class="content"><p>Тут будет вся информация о пользователе</p><p>Для перехода к списку todo листа нажмите кнопку <b> На главную </b></p><p>Для выхода из приложения можно нажать кнопку <b>Выход</b></p></div></div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script><script>$(document).ready(function () {
+    $.post('/user', function (data) {
+        $('div.col-md-9 > h1').append(' <em>' + data.username + '</em>');
+    })
+})</script></body>

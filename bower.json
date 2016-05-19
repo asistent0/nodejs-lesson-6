@@ -1,0 +1,19 @@
+{
+  "name": "views",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "eonasdan-bootstrap-datetimepicker": "^4.17.37",
+    "bootstrap": "^3.3.6",
+    "jquery": "^1.12.3"
+  }
+}

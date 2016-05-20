@@ -52,21 +52,15 @@ app.post('/login', passport.authenticate('local', {
 }));
 
 app.get('/logout', userController.logout);
-app.get('/user', mustBeAuthentificated, userController.getUser);
+app.get('/user', userController.mustBeAuth, userController.getUser);
 app.post('/user', userController.postUser);
-app.get('/', mustBeAuthentificated, todoController.index);
+app.get('/', userController.mustBeAuth, todoController.index);
 app.post('/', todoController.getting);
 app.post('/add', todoController.add);
-app.post('/description', todoController.description);
-app.post('/completed', todoController.completed);
-app.post('/dell', todoController.dell);
+app.put('/edit/:id', todoController.edit);
+app.patch('/completed/:id', todoController.completed);
+app.delete('/dell/:id', todoController.dell);
 
-function mustBeAuthentificated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login'); // go to login page
-}
 
 app.listen(config.get('port'), function () {
     console.log('Server is launched on: http://localhost:' + config.get('port'))

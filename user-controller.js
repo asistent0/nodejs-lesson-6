@@ -4,7 +4,7 @@
 
 var getLogin = function (req, res) {
     if (req.isAuthenticated()) {
-        res.redirect('/');
+        return res.redirect('/');
     }
     res.render('login');
 };
@@ -22,9 +22,17 @@ var logout = function (req, res) {
     res.redirect('/');
 };
 
+function mustBeAuthentificated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login'); // go to login page
+}
+
 module.exports = {
     getLogin: getLogin,
     getUser: getUser,
     postUser: postUser,
-    logout: logout
+    logout: logout,
+    mustBeAuth: mustBeAuthentificated
 };

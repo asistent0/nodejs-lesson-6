@@ -42,8 +42,8 @@ var add = function (req, res) {
 };
 
 // Change task description
-var description = function (req, res) {
-    return TodoModel.findById(req.body.id, function (err, todo) {
+var edit = function (req, res) {
+    return TodoModel.findById(req.params.id, function (err, todo) {
         if (err) {
             return res.send({status: 'error', msg: 'Ошибка получения данных по этой задаче'});
         }
@@ -67,7 +67,7 @@ var description = function (req, res) {
 
 // Mark task as resolved
 var completed = function (req, res) {
-    return TodoModel.findById(req.body.id, function (err, todo) {
+    return TodoModel.findById(req.params.id, function (err, todo) {
         if (!todo) {
             return res.send({status: 'error', msg: 'Ошибка получения данных по этой задаче'});
         }
@@ -90,11 +90,11 @@ var completed = function (req, res) {
 
 // Delete task
 var dell = function (req, res) {
-    return TodoModel.findById(req.body.id, function (err, todo) {
+    return TodoModel.findById(req.params.id, function (err, todo) {
         if (!todo) {
             return res.send({status: 'error', msg: 'Ошибка получения данных по этой задаче'});
         }
-        return TodoModel.remove({_id: req.body.id}, function (err) {
+        return TodoModel.remove({_id: req.params.id}, function (err) {
             if (err) {
                 return res.send(err);
             }
@@ -107,7 +107,7 @@ module.exports = {
     index: index,
     getting: getting,
     add: add,
-    description: description,
+    edit: edit,
     completed: completed,
     dell: dell
 };

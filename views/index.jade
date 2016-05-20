@@ -64,11 +64,14 @@ body
     script(src="/moment/min/moment.min.js")
     script(src="/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
     script.
-
-        $(function () {
+        // Функция для определения календаря
+        function datePicker() {
             $('#datetimepicker').datetimepicker();
-        });
+        };
 
+        $(datePicker);
+
+        // Функция для отображения сообщений ошибки
         function alertError(msg) {
             $('div.todolist').after('<div class="alert alert-danger"><b>' + msg + '</div>');
             setTimeout(function () {
@@ -78,73 +81,89 @@ body
 
         // Загружаем задачи
         $(document).ready(function () {
-            $.post('/', function (data) {
-                if (data.status == 'error') {
-                    return alertError(data.msg);
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 'error') {
+                        return alertError(data.msg);
+                    }
+                    $.each(data.todo, function (index, param) {
+                        var check = '';
+                        if (param.completed === true) {
+                            check = 'checked';
+                        } else {
+                            check = '';
+                        }
+                        $('tr.add')
+                                .before('<tr>' +
+                                        '<td><input type="checkbox" ' + check + ' data-id="' +
+                                        param._id + '"></td>' +
+                                        '<td><span data-id="' + param._id + '">' + param.title + '</span></td>' +
+                                        '<td><span data-id="' + param._id + '">' +
+                                        param.description + '</span></td>' +
+                                        '<td><span data-id="' + param._id + '">' + param.date + '</span></td>' +
+                                        '<td><button type="button" class="btn btn-danger" name="dell" data-id="' +
+                                        param._id + '">' +
+                                        '<span class="glyphicon glyphicon-trash"></span></button>' +
+                                        '<button type="button" class="btn btn-success" name="edit" data-id="' +
+                                        param._id + '">' +
+                                        '<span class="glyphicon glyphicon-pencil"></span></button></td>' +
+                                        '</tr>');
+                        if (param.completed === true) {
+                            $('[data-id="' + param._id + '"]').addClass('complete');
+                        } else {
+                            $('[data-id="' + param._id + '"]').removeClass('complete');
+                        }
+                    });
+                },
+                error: function () {
+                    return alertError('Ошибка подключения к базе данных');
                 }
-                $.each(data.todo, function (index, param) {
-                    var check = '';
-                    if (param.completed === true) {
-                        check = 'checked';
-                    } else {
-                        check = '';
-                    }
-                    $('tr.add')
-                            .before('<tr>' +
-                                    '<td><input type="checkbox" ' + check + ' data-id="' + param._id + '"></td>' +
-                                    '<td><span data-id="' + param._id + '">' + param.title + '</span></td>' +
-                                    '<td><span data-id="' + param._id + '">' + param.description + '</span></td>' +
-                                    '<td><span data-id="' + param._id + '">' + param.date + '</span></td>' +
-                                    '<td><button type="button" class="btn btn-danger" name="dell" data-id="' +
-                                    param._id + '">' +
-                                    '<span class="glyphicon glyphicon-trash"></span></button>' +
-                                    '<button type="button" class="btn btn-success" name="edit" data-id="' +
-                                    param._id + '">' +
-                                    '<span class="glyphicon glyphicon-pencil"></span></button></td>' +
-                                    '</tr>');
-                    if (param.completed === true) {
-                        $('[data-id="' + param._id + '"]').addClass('complete');
-                    } else {
-                        $('[data-id="' + param._id + '"]').removeClass('complete');
-                    }
-                });
-            }, 'json').fail(function () {
-                return alertError('Ошибка подключения к базе данных');
             });
 
             // Отметка задач об выполнении
             $(document).on('change', 'input:checkbox', function () {
                 var id = $(this).data('id');
-                $.post('/completed', {
-                    'id': id
-                }, function (data) {
-                    if (data.status === 'error') {
-                        return alertError('Сменить значение задачи не удалось' + data.msg);
+                $.ajax({
+                    type: 'PATCH',
+                    url: '/completed/' + id,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status === 'error') {
+                            return alertError('Сменить значение задачи не удалось' + data.msg);
+                        }
+                        if (data.todo.completed) {
+                            $('[data-id="' + id + '"]').addClass('complete');
+                        } else {
+                            $('[data-id="' + id + '"]').removeClass('complete');
+                        }
+                    },
+                    error: function () {
+                        return alertError('Ошибка подключения к базе данных');
                     }
-                    if (data.todo.completed) {
-                        $('[data-id="' + id + '"]').addClass('complete');
-                    } else {
-                        $('[data-id="' + id + '"]').removeClass('complete');
-                    }
-                }, 'json').fail(function () {
-                    return alertError('Ошибка подключения к базе данных');
                 });
             });
 
             // Удаление задач
             $(document).on('click', "button[name='dell']", function () {
                 var id = $(this).data('id');
-                $.post('/dell', {
-                    'id': id
-                }, function (data) {
-                    if (data.status === 'error') {
-                        return alertError('Удалить не удалось' + data.msg);
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/dell/' + id,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status === 'error') {
+                            return alertError('Удалить не удалось' + data.msg);
+                        }
+                        if (data.status === 'success') {
+                            $('[data-id="' + id + '"]').parent('td').parent('tr').remove();
+                        }
+                    },
+                    error: function () {
+                        return alertError('Ошибка подключения к базе данных');
                     }
-                    if (data.status === 'success') {
-                        $('[data-id="' + id + '"]').parent('td').parent('tr').remove();
-                    }
-                }, 'json').fail(function () {
-                    return alertError('Ошибка подключения к базе данных');
                 });
             });
 
@@ -163,11 +182,9 @@ body
                         'value="' + val1 + '">');
                 $(data[2]).replaceWith('<div class="row"><div class="col-sm-12"><input type="text" ' +
                         'class="form-control" placeholder="Дата создания" name="date-edit" ' +
-                        'data-id="' + id + '" value="' + val2 + '" id="datetimepicker1"></div></div>');
+                        'data-id="' + id + '" value="' + val2 + '" id="datetimepicker"></div></div>');
 
-                $(function () {
-                    $('#datetimepicker1').datetimepicker();
-                });
+                $(datePicker);
 
                 var check = $('input[type="checkbox"][data-id="' + id + '"]');
                 $(check[0]).replaceWith('<input type="hidden" data-name="check" data-id="' + id + '">');
@@ -181,28 +198,36 @@ body
                     var description = $('input[name="description-edit"][data-id="' + id + '"]');
                     var date = $('input[name="date-edit"][data-id="' + id + '"]');
 
-                    $.post('/description', {
-                        'id': id,
-                        'title': title.val(),
-                        'date': date.val(),
-                        'description': description.val()
-                    }, function (data) {
-                        if (data.status === 'error') {
-                            return alertError(data.msg);
-                        }
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/edit/' + id,
+                        dataType: 'json',
+                        data: {
+                            'title': title.val(),
+                            'date': date.val(),
+                            'description': description.val()
+                        },
+                        success: function (data) {
+                            if (data.status === 'error') {
+                                return alertError(data.msg);
+                            }
 
-                        $(title).replaceWith('<span data-id="' + data.todo._id + '">' + data.todo.title +
-                                '</span>');
-                        $(description).replaceWith('<span data-id="' + data.todo._id + '">' +
-                                data.todo.description + '</span>');
-                        $(date).replaceWith('<span data-id="' + data.todo._id + '">' + data.todo.date + '</span>');
-                        $('button[name="add-edit"][data-id="' + id + '"]').replaceWith('<button type="button" ' +
-                                'class="btn btn-success" name="edit" data-id="' + data.todo._id + '">' +
-                                '<span class="glyphicon glyphicon-pencil"></span></button>');
-                        $('input[data-name="check"][data-id="' + id + '"]').replaceWith('<input type="checkbox"' +
-                                ' data-id="' + data.todo._id + '">');
-                    }, 'json').fail(function () {
-                        return alertError('Ошибка подключения к базе данных');
+                            $(title).replaceWith('<span data-id="' + data.todo._id + '">' + data.todo.title +
+                                    '</span>');
+                            $(description).replaceWith('<span data-id="' + data.todo._id + '">' +
+                                    data.todo.description + '</span>');
+                            $(date).replaceWith('<span data-id="' + data.todo._id + '">' +
+                                    data.todo.date + '</span>');
+                            $('button[name="add-edit"][data-id="' + id + '"]').replaceWith('<button type="button" ' +
+                                    'class="btn btn-success" name="edit" data-id="' + data.todo._id + '">' +
+                                    '<span class="glyphicon glyphicon-pencil"></span></button>');
+                            $('input[data-name="check"][data-id="' + id + '"]')
+                                    .replaceWith('<input type="checkbox"' +
+                                            ' data-id="' + data.todo._id + '">');
+                        },
+                        error: function () {
+                            return alertError('Ошибка подключения к базе данных');
+                        }
                     });
                 });
             });
@@ -213,30 +238,37 @@ body
                 var description = $("input[name='description']");
                 var date = $("input[name='date']");
 
-                $.post('/add', {
-                    'title': title.val(),
-                    'description': description.val(),
-                    'date': date.val()
-                }, function (data) {
-                    if (data.status === 'error') {
-                        return alertError(data.msg);
+                $.ajax({
+                    type: 'POST',
+                    url: '/add',
+                    dataType: 'json',
+                    data: {
+                        'title': title.val(),
+                        'description': description.val(),
+                        'date': date.val()
+                    },
+                    success: function (data) {
+                        if (data.status === 'error') {
+                            return alertError(data.msg);
+                        }
+                        $('tr.add')
+                                .before('<tr>' +
+                                        '<td><input type="checkbox" data-id="' + data.todo._id + '"></td>' +
+                                        '<td><span data-id="' + data.todo._id + '">' + data.todo.title +
+                                        '</span></td><td><span data-id="' + data.todo._id + '">' +
+                                        data.todo.description + '</span></td>' +
+                                        '<td><span data-id="' + data.todo._id + '">' + data.todo.date +
+                                        '</span></td><td><button type="button" class="btn btn-danger" ' +
+                                        'name="dell" data-id="' + data.todo._id + '">' +
+                                        '<span class="glyphicon glyphicon-trash"></span></button>' +
+                                        '<button type="button" class="btn btn-success" name="edit" data-id="' +
+                                        data.todo._id + '">' +
+                                        '<span class="glyphicon glyphicon-pencil"></span></button></td>' +
+                                        '</tr>');
+                    },
+                    error: function () {
+                        return alertError('Ошибка подключения к базе данных');
                     }
-                    $('tr.add')
-                            .before('<tr>' +
-                                    '<td><input type="checkbox" data-id="' + data.todo._id + '"></td>' +
-                                    '<td><span data-id="' + data.todo._id + '">' + data.todo.title + '</span></td>' +
-                                    '<td><span data-id="' + data.todo._id + '">' + data.todo.description +
-                                    '</span></td>' +
-                                    '<td><span data-id="' + data.todo._id + '">' + data.todo.date + '</span></td>' +
-                                    '<td><button type="button" class="btn btn-danger" name="dell" data-id="' +
-                                    data.todo._id + '">' +
-                                    '<span class="glyphicon glyphicon-trash"></span></button>' +
-                                    '<button type="button" class="btn btn-success" name="edit" data-id="' +
-                                    data.todo._id + '">' +
-                                    '<span class="glyphicon glyphicon-pencil"></span></button></td>' +
-                                    '</tr>');
-                }, 'json').fail(function () {
-                    return alertError('Ошибка подключения к базе данных');
                 });
 
                 title.val('');

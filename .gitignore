@@ -1,4 +1,4 @@
 /node_modules/
 /.idea/
 /views/vendor/
-# /views/*.html
+/views/**/*.html

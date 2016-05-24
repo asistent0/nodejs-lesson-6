@@ -18,7 +18,7 @@ var app = express();
 
 app.use(express.static(path.join(__dirname, '/views/vendor')));
 
-app.set(express.static(path.join(__dirname, '/views')));
+app.set('views', path.join(__dirname, '/views'));
 app.engine('jade', template);
 app.set('view engine', 'jade');
 
